@@ -20,7 +20,7 @@ import java.util.Locale;
 @RequestMapping("/")
 public class MainController {
 
-    //@Autowired 
+    //@Autowired
     StudentServise studentServise;
 
     @Autowired
