@@ -20,8 +20,8 @@ import java.util.Locale;
 @RequestMapping("/")
 public class MainController {
 
-    @Autowired
-    StudentServise service;
+    //@Autowired 
+    StudentServise studentServise;
 
     @Autowired
     MessageSource messageSource;
@@ -29,7 +29,7 @@ public class MainController {
 
     @RequestMapping(value = {"/", "/list"}, method = RequestMethod.GET)
     public String listStudents(ModelMap modelMap){
-        List<Student> students = service.findAllStudents();
+        List<Student> students = studentServise.findAllStudents();
         modelMap.addAttribute("students", students);
         return "allstudents";
     }
@@ -52,7 +52,7 @@ public class MainController {
         if (result.hasErrors()){
             return "registration";
         }
-        if (!service.isStudentCodeUnique(student.getId(), student.getCode())){
+        if (!studentServise.isStudentCodeUnique(student.getId(), student.getCode())){
             FieldError codeError = new FieldError("Student", "code",
                     messageSource.getMessage("non.unique.code", new String[]{student.getCode()},
                             Locale.getDefault()));
@@ -60,7 +60,7 @@ public class MainController {
             return "registration";
         }
 
-        service.savestudent(student);
+        studentServise.saveStudent(student);
 
         modelMap.addAttribute("success", "Student" + student.getName() + " registered successfuly");
 
@@ -73,14 +73,14 @@ public class MainController {
         if (result.hasErrors()){
             return "registration";
         }
-        if (!service.isStudentCodeUnique(student.getId(), student.getCode())){
+        if (!studentServise.isStudentCodeUnique(student.getId(), student.getCode())){
             FieldError codeError = new FieldError("Student","code",
                     messageSource.getMessage("non.unique.code", new String[]{student.getCode()},Locale.getDefault()));
             result.addError(codeError);
             return "registration";
         }
 
-        service.updateStudent(student);
+        studentServise.updateStudent(student);
         modelMap.addAttribute("success", "Student "+student.getName() + " updated successfuly");
         return "success";
 
@@ -89,9 +89,15 @@ public class MainController {
 
     @RequestMapping(value = {"/edit-{code}-student"}, method = RequestMethod.GET)
     public String editStudent(@PathVariable String code, ModelMap modelMap){
-        Student student = service.findStudentByCode(code);
+        Student student = studentServise.findStudentByCode(code);
         modelMap.addAttribute("student", student);
         modelMap.addAttribute("edit", true);
         return "registration";
+    }
+
+    @RequestMapping(value = {"/delete-{code}-student"}, method = RequestMethod.GET)
+    public String deleteStudent(@PathVariable String code){
+        studentServise.deleteStudent(code);
+        return "redirect:/list";
     }
 }
