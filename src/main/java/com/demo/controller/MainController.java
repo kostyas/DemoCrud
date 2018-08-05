@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -64,5 +65,33 @@ public class MainController {
         modelMap.addAttribute("success", "Student" + student.getName() + " registered successfuly");
 
         return "success";
+    }
+
+    @RequestMapping(value = {"/edit-{code)-student"}, method = RequestMethod.POST)
+    public String updateStudent(@Valid Student student, BindingResult result, ModelMap modelMap,
+                                @PathVariable String code){
+        if (result.hasErrors()){
+            return "registration";
+        }
+        if (!service.isStudentCodeUnique(student.getId(), student.getCode())){
+            FieldError codeError = new FieldError("Student","code",
+                    messageSource.getMessage("non.unique.code", new String[]{student.getCode()},Locale.getDefault()));
+            result.addError(codeError);
+            return "registration";
+        }
+
+        service.updateStudent(student);
+        modelMap.addAttribute("success", "Student "+student.getName() + " updated successfuly");
+        return "success";
+
+    }
+
+
+    @RequestMapping(value = {"/edit-{code}-student"}, method = RequestMethod.GET)
+    public String editStudent(@PathVariable String code, ModelMap modelMap){
+        Student student = service.findStudentByCode(code);
+        modelMap.addAttribute("student", student);
+        modelMap.addAttribute("edit", true);
+        return "registration";
     }
 }
